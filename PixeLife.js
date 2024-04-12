@@ -22,6 +22,8 @@ const colors = {
     border: [255,0,255],
     fire: [255,0,0],
     steam: [80,80,80],
+    dirt: [150,40,0],
+    mud: [100,40,0],
 
     solid: [70,70,70],
     liquid: [0,0,255],
@@ -35,6 +37,8 @@ const functions = {
     water: moveWater,
     fire: moveFire,
     steam: moveSteam,
+    dirt: moveDirt,
+    mud: moveMud,
     border: null,
 }
 const type = {
@@ -43,10 +47,12 @@ const type = {
     water: ["liquid"],
     fire: ["hot"],
     steam: ["gas","liquid"],
+    dirt: [],
+    mud: [],
     border: [],
 }
 const elementCatagory = {
-    solid: ["sand"],
+    solid: ["sand","dirt","mud","sand",],
     liquid: ["water"],
     gas: ["air","steam"],
     plasma: ["fire"],
@@ -66,6 +72,49 @@ function moveSteam(x,y) {
         newGrid[x][y] = "air";
         newGrid[x][y-1] = "steam"
     }
+}
+
+function moveDirt(x,y) {
+    for (let i = -1; i < 2; i ++) {
+        for (let j = -1; j < 2; j++) {
+            if (grid[i+x][j+y] === "water") {
+                newGrid[x][y] = "mud";
+                grid[i+x][j+y] = "air";
+                return
+            }
+        }
+    }
+    let direction = Math.floor(Math.random()*3)-1
+    if (type[newGrid[x][y+1]].includes("liquid") && type[newGrid[x+direction][y+1]].includes("gas")) {
+        newGrid[x][y] = grid[x+direction][y+1];
+        newGrid[x+direction][y+1] = grid[x][y+1];
+        newGrid[x][y+1] = "dirt"
+    } else if (type[newGrid[x][y+1]].includes("liquid")) {
+        newGrid[x][y] = grid[x][y+1];
+        newGrid[x][y+1] = "dirt"
+    } else if (type[newGrid[x+direction][y+1]].includes("liquid")) {
+        newGrid[x][y] = grid[x+direction][y+1];
+        newGrid[x+direction][y+1] = "dirt"
+    }
+}
+
+function moveMud(x,y) {
+    for (let i = -1; i < 2; i ++) {
+        for (let j = -1; j < 2; j++) {
+            if (type[grid[i+x][j+y]].includes("hot")) {
+                newGrid[x][y] = "dirt";
+                return
+            }
+        }
+    }
+    let direction = Math.floor(Math.random()*3)-1
+    if (type[newGrid[x][y+1]].includes("liquid") && type[newGrid[x+direction][y+1]].includes("gas")) {
+        newGrid[x][y] = grid[x+direction][y+1];
+        newGrid[x+direction][y+1] = grid[x][y+1];
+        newGrid[x][y+1] = "mud"
+    } else if (type[newGrid[x][y+1]].includes("liquid")) {
+        newGrid[x][y] = grid[x][y+1];
+        newGrid[x][y+1] = "mud" }
 }
 
 function moveFire(x,y) {
@@ -107,6 +156,11 @@ function moveSand(x,y) {
         newGrid[x][y] = grid[x+direction][y+1];
         newGrid[x+direction][y+1] = grid[x][y+1];
         newGrid[x][y+1] = "sand"
+    } else 
+    if (type[newGrid[x][y+1]].includes("liquid") && type[newGrid[x+direction][y+1]].includes("gas")) {
+        newGrid[x][y] = grid[x+direction][y+1];
+        newGrid[x+direction][y+1] = grid[x][y+1];
+        newGrid[x][y+1] = "sand"
     } else if (type[newGrid[x][y+1]].includes("liquid")) {
         newGrid[x][y] = grid[x][y+1];
         newGrid[x][y+1] = "sand"
@@ -115,6 +169,9 @@ function moveSand(x,y) {
         newGrid[x+direction][y+1] = "sand"
     }
 }
+
+//-----No touchie-----//
+
 window.onload = function() {
     board = document.getElementById("board")
     board.height = canvasSize
@@ -223,6 +280,7 @@ function setGame (){
         catagoryButton.style.backgroundColor = `${color}`;
         catagoryButton.style.backgroundColor.opacity = 0.2;
         catagoryButton.addEventListener("click",switchCatagory)
+        catagoryButton.className = "btn-group"
         catagoryButton.setAttribute("id",catagories[i])
         let button;
         for (let j = 0; j<elementCatagory[catagories[i]].length;j++) {
@@ -241,7 +299,9 @@ function setGame (){
                 0.5)`
             button.style.backgroundColor = `${color}`;
             button.style.backgroundColor.opacity = 0.2;
-            button.addEventListener("click",switchElement);
+            button.addEventListener("click",function (event) {
+                element = this.id;
+            });
             button.setAttribute("id",elementCatagory[catagories[i]][j]);
             button.style.display = "none"
             catagoryButton.appendChild(button);
@@ -264,19 +324,19 @@ function setGame (){
 }
 
 function switchCatagory() {
-    let children = document.getElementById(catagory).children
+    let oldCatagory = document.getElementById(catagory)
+    let children = oldCatagory.children
     for (let i = 0; i < children.length;i++) {
         children[i].style.display = "none"
+        oldCatagory.style.minWidth = 0;
+        oldCatagory.style.maxHeight = 30;
     }
     children = this.children
     for (let i = 0; i < children.length;i++) {
         children[i].style.display = "block"
+        this.style.minWidth= "300px";
     }
     catagory = this.id;
-}
-
-function switchElement() {
-    element = this.id;
 }
 
 function displayBoard () {
