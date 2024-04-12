@@ -20,34 +20,77 @@ const colors = {
     sand: [255,230,179],
     water: [0,0,255],
     border: [255,0,255],
-
+    fire: [255,0,0],
+    steam: [80,80,80],
 
     solid: [70,70,70],
     liquid: [0,0,255],
     gas: [255,255,255],
+    plasma: [255,100,0],
     special: [255,0,255],
 };
 const functions = {
     air: null,
     sand: moveSand,
     water: moveWater,
+    fire: moveFire,
+    steam: moveSteam,
     border: null,
 }
 const type = {
     air: ["liquid","gas"],
     sand: [],
     water: ["liquid"],
+    fire: ["hot"],
+    steam: ["gas","liquid"],
     border: [],
 }
 const elementCatagory = {
     solid: ["sand"],
     liquid: ["water"],
-    gas: ["air"],
-    special: ["border"]
+    gas: ["air","steam"],
+    plasma: ["fire"],
+    special: ["border"],
 }
-const catagories = ["solid","liquid","gas","special",]
+const catagories = ["solid","liquid","gas","plasma","special",]
+
+function moveSteam(x,y) {
+    let direction = Math.floor(Math.random()*3)-1
+    if (Math.random() >0.98) {
+        newGrid[x][y] = "water";
+        return
+    } else if (newGrid[x+direction][y] == "air") {
+        newGrid[x][y] = "air";
+        newGrid[x+direction][y] = "steam"
+    }else if (newGrid[x][y-1] == "air") {
+        newGrid[x][y] = "air";
+        newGrid[x][y-1] = "steam"
+    }
+}
+
+function moveFire(x,y) {
+    let direction = Math.floor(Math.random()*3)-1
+    if (Math.random() >0.93) {
+        newGrid[x][y] = "air";
+        return
+    } else if (newGrid[x+direction][y-1] == "air") {
+        newGrid[x][y] = "air";
+        newGrid[x+direction][y-1] = "fire"
+    }else if (newGrid[x][y-1] == "air") {
+        newGrid[x][y] = "air";
+        newGrid[x][y-1] = "fire"
+    }
+}
 
 function moveWater(x,y) {
+    for (let i = -1; i < 2; i++) {
+        for (let j = -1; j < 2; j++) {
+            if (type[grid[x+i][y+j]].includes("hot")) {
+                newGrid[x][y] = "steam";
+                return
+            }
+        }
+    }
     let direction = Math.floor(Math.random()*3)-1
     if (newGrid[x][y+1] == "air") {
         newGrid[x][y] = "air";
