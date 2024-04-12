@@ -9,6 +9,7 @@ let newGrid = {}
 let context
 let board
 let mousedown = false
+let mousex, mousey
 
 const colors = {
     air: "rgb(200,200,200)",
@@ -42,13 +43,16 @@ window.onload = function() {
     context = board.getContext("2d")
     setGame();
     
-    board.onmousedown = function(event) {
+    board.onmousedown = function(e) {
+        mousex = e.offsetY
+        mousey = e.offsetX
         mousedown = true;
-        grid[Math.floor(event.offsetX/cellSize)][Math.floor(event.offsetY/cellSize)] = "sand"
+        grid[Math.floor(e.offsetX/cellSize)][Math.floor(e.offsetY/cellSize)] = "sand"
     }
-    board.onmousemove = function(event) {
+    board.onmousemove = function(e) {
+        mousex, mousey = e.offsetX, e.offsetY
         if (mousedown) {
-            grid[Math.floor(event.offsetX/cellSize)][Math.floor(event.offsetY/cellSize)] = "sand"
+            grid[Math.floor(e.offsetX/cellSize)][Math.floor(e.offsetY/cellSize)] = "sand"
         }
     }
     board.onmouseup = function(event) {
@@ -56,7 +60,7 @@ window.onload = function() {
         newGrid[Math.floor(event.offsetX/cellSize)][Math.floor(event.offsetY/cellSize)] = "sand"
         //console.log(grid)
     }
-    document.addEventListener("contextmenu", event => event.preventDefault());
+    //document.addEventListener("contextmenu", event => event.preventDefault());
     
     setInterval(update,1000/60);
 }
