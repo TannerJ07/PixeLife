@@ -1,0 +1,12 @@
+body {
+    font-family: 'Courier New', Courier, monospace;
+    text-align: center;
+    background-color: black;
+    color: white;
+    user-select: none;
+}
+
+#board {
+    margin: 0 auto;
+    user-select: none;
+}
