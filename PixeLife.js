@@ -11,7 +11,7 @@ let board;
 let selector
 let mousedown = false;
 let mousex, mousey;
-let element = "water";
+let element = "sand";
 let catagory = "solid";
 const colors = {
     air: [200,200,200],
@@ -28,6 +28,12 @@ const functions = {
     sand: moveSand,
     water: moveWater,
     border: null,
+}
+const type = {
+    air: ["liquid","gas"],
+    sand: [],
+    water: ["liquid"],
+    border: [],
 }
 const elementCatagory = {
     solid: ["sand"],
@@ -48,11 +54,15 @@ function moveWater(x,y) {
 
 function moveSand(x,y) {
     let direction = Math.floor(Math.random()*3)-1
-    if (newGrid[x][y+1] == "air") {
-        newGrid[x][y] = "air";
+    if (type[newGrid[x][y+1]].includes("liquid") && type[newGrid[x+direction][y+1]].includes("gas")) {
+        newGrid[x][y] = grid[x+direction][y+1];
+        newGrid[x+direction][y+1] = grid[x][y+1];
         newGrid[x][y+1] = "sand"
-    } else if (newGrid[x+direction][y+1] == "air") {
-        newGrid[x][y] = "air";
+    } else if (type[newGrid[x][y+1]].includes("liquid")) {
+        newGrid[x][y] = grid[x][y+1];
+        newGrid[x][y+1] = "sand"
+    } else if (type[newGrid[x+direction][y+1]].includes("liquid")) {
+        newGrid[x][y] = grid[x+direction][y+1];
         newGrid[x+direction][y+1] = "sand"
     }
 }
@@ -65,13 +75,13 @@ window.onload = function() {
     setGame();
     
     board.onmousedown = function(e) {
-        mousex = e.offsetX
-        mousey = e.offsetY
+        mousex = Math.floor(e.offsetX/cellSize)
+        mousey = Math.floor(e.offsetY/cellSize)
         mousedown = e.buttons;
     }
     board.onmousemove = function(e) {
-        mousex = e.offsetX
-        mousey = e.offsetY
+        mousex = Math.floor(e.offsetX/cellSize)
+        mousey = Math.floor(e.offsetY/cellSize)
     }
     board.onmouseup = function() {
         mousedown = null
@@ -81,11 +91,12 @@ window.onload = function() {
 }
 
 function update() {
+    if (mousex > 0 && mousex < boardWidth && mousey > 0 && mousey < boardHeight)
     if (mousedown==1) {
-        grid[Math.floor(mousex/cellSize)][Math.floor(mousey/cellSize)] = element
+        grid[mousex][mousey] = element
     }
     if (mousedown==2) {
-        grid[Math.floor(mousex/cellSize)][Math.floor(mousey/cellSize)] = "air"
+        grid[mousex][mousey] = "air"
     }
     updateGrid();
     displayBoard();
@@ -105,7 +116,7 @@ function updateGrid() {
     //newGrid = grid
     for (let j = 0; j < boardHeight; j++) {
         for (let i = 0; i < boardWidth; i++) {
-            if (functions[grid[i][j]]) {
+            if (functions[grid[i][j]] && grid[i][j] == newGrid[i][j]) {
                 functions[grid[i][j]](i,j);
             }
         }
