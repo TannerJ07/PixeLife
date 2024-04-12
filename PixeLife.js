@@ -91,13 +91,14 @@ window.onload = function() {
 }
 
 function update() {
-    if (mousex > 0 && mousex < boardWidth && mousey > 0 && mousey < boardHeight)
-    if (mousedown==1) {
-        grid[mousex][mousey] = element
-    }
-    if (mousedown==2) {
-        grid[mousex][mousey] = "air"
-    }
+    if (mousex > 0 && mousex < boardWidth && mousey > 0 && mousey < boardHeight) {
+        if (mousedown==1) {
+            grid[mousex][mousey] = element
+        }
+        if (mousedown==2) {
+            grid[mousex][mousey] = "air"
+        }
+    }  
     updateGrid();
     displayBoard();
 }
