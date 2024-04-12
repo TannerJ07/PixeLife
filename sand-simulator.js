@@ -5,25 +5,37 @@ const cellSize = 12
 const canvasSize = boardWidth*cellSize
 
 let grid = {}
-let newGrid = {}
-let context
-let board
-let mousedown = false
-let mousex, mousey
+let newGrid = {};
+let context;
+let board;
+let mousedown = false;
+let mousex, mousey;
+let element = "sand";
 
 const colors = {
     air: "rgb(200,200,200)",
     sand: "yellow",
+    water: "blue",
+    border: "palevioletred",
 };
 const functions = {
     air: null,
-    sand: moveSand
+    sand: moveSand,
+    water: moveWater,
+    border: null,
+}
+function moveWater(x,y) {
+    let direction = Math.floor(Math.random()*3)-1
+    if (newGrid[x][y+1] == "air") {
+        newGrid[x][y] = "air";
+        newGrid[x][y+1] = "water"
+    } else if (newGrid[x+direction][y] == "air") {
+        newGrid[x][y] = "air";
+        newGrid[x+direction][y] = "water"
+    }
 }
 
 function moveSand(x,y) {
-
-    //newGrid[1][2] = "sand"
-    //grid[x][2] = "sand";
     let direction = Math.floor(Math.random()*3)-1
     if (newGrid[x][y+1] == "air") {
         newGrid[x][y] = "air";
@@ -32,9 +44,6 @@ function moveSand(x,y) {
         newGrid[x][y] = "air";
         newGrid[x+direction][y+1] = "sand"
     }
-    
-    
-    //*/
 }
 window.onload = function() {
     board = document.getElementById("board")
@@ -46,8 +55,7 @@ window.onload = function() {
     board.onmousedown = function(e) {
         mousex = e.offsetX
         mousey = e.offsetY
-        mousedown = true;
-        grid[Math.floor(e.offsetX/cellSize)][Math.floor(e.offsetY/cellSize)] = "sand"
+        mousedown = e.buttons;
     }
     board.onmousemove = function(e) {
         mousex = e.offsetX
@@ -56,14 +64,16 @@ window.onload = function() {
     board.onmouseup = function() {
         mousedown = false
     }
-    //document.addEventListener("contextmenu", event => event.preventDefault());
-    
+    window.oncontextmenu = function () { return false; }
     setInterval(update,1000/60);
 }
 
 function update() {
-    if (mousedown) {
-        grid[Math.floor(mousex/cellSize)][Math.floor(mousey/cellSize)] = "sand"
+    if (mousedown==1) {
+        grid[Math.floor(mousex/cellSize)][Math.floor(mousey/cellSize)] = element
+    }
+    if (mousedown==2) {
+        grid[Math.floor(mousex/cellSize)][Math.floor(mousey/cellSize)] = "air"
     }
     updateGrid();
     displayBoard();
@@ -73,7 +83,11 @@ function updateGrid() {
     for (let i = 0; i < boardHeight; i++) {
         newGrid[i] = {};
         for (let j = 0; j < boardWidth; j++) {
-            newGrid[i][j] = grid[i][j];
+            if (i==0||j==0||i==boardWidth-1||j==boardHeight-1) {
+                newGrid[i][j] = "border";
+            } else {
+                newGrid[i][j] = grid[i][j];
+            }
         }
     }//*/
     //newGrid = grid
