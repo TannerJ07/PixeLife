@@ -10,9 +10,11 @@ let context;
 let board;
 let selector
 let mousedown = false;
+let mouseSize = 1;
 let mousex, mousey;
 let element = "sand";
 let catagory = "solid";
+let doMouse = true;
 const colors = {
     air: [200,200,200],
     sand: [255,230,179],
@@ -22,6 +24,8 @@ const colors = {
 
     solid: [70,70,70],
     liquid: [0,0,255],
+    gas: [255,255,255],
+    special: [255,0,255],
 };
 const functions = {
     air: null,
@@ -38,8 +42,10 @@ const type = {
 const elementCatagory = {
     solid: ["sand"],
     liquid: ["water"],
+    gas: ["air"],
+    special: ["border"]
 }
-const catagories = ["solid","liquid",]
+const catagories = ["solid","liquid","gas","special",]
 
 function moveWater(x,y) {
     let direction = Math.floor(Math.random()*3)-1
@@ -91,14 +97,32 @@ window.onload = function() {
 }
 
 function update() {
-    if (mousex > 0 && mousex < boardWidth && mousey > 0 && mousey < boardHeight) {
-        if (mousedown==1) {
-            grid[mousex][mousey] = element
+    if (mousedown==1&&doMouse) {
+        for (let i = 0; i< mouseSize; i++) {
+            for (let j=0; j < mouseSize; j++) {
+                let placex = Math.floor(mousex+i-mouseSize/2);
+                let placey = Math.floor(mousey+j-mouseSize/2);
+                if (placex>0&&placex<boardWidth-1&&placey>0&&placey<boardHeight-1)
+                grid[placex][placey] = element
+            }
         }
-        if (mousedown==2) {
-            grid[mousex][mousey] = "air"
+    }
+    if (mousedown==2&&doMouse) {
+        for (let i = 0; i< mouseSize; i++) {
+            for (let j=0; j < mouseSize; j++) {
+                let placex = Math.floor(mousex+i-mouseSize/2);
+                let placey = Math.floor(mousey+j-mouseSize/2);
+                if (placex>0&&placex<boardWidth-1&&placey>0&&placey<boardHeight-1)
+                grid[placex][placey] = "air"
+            }
         }
-    }  
+    }
+    if (doMouse) {
+        doMouse = false;
+    } else {
+        doMouse = true;
+    }
+    
     updateGrid();
     displayBoard();
 }
@@ -181,6 +205,19 @@ function setGame (){
         }
         selector.appendChild(catagoryButton);
     }
+    window.addEventListener("keydown", function (event) {
+        switch(event.key) {
+            case "=":
+                mouseSize++;
+                break;
+                
+            case "-":
+                if (mouseSize > 1) {
+                mouseSize--;}
+                break;
+        }
+        //console.log(event)
+    });
 }
 
 function switchCatagory() {
