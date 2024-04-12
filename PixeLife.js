@@ -124,13 +124,13 @@ window.onload = function() {
     setGame();
     
     board.onmousedown = function(e) {
-        mousex = Math.floor(e.offsetX/cellSize)
-        mousey = Math.floor(e.offsetY/cellSize)
+        mousex = e.offsetX/cellSize
+        mousey = e.offsetY/cellSize
         mousedown = e.buttons;
     }
     board.onmousemove = function(e) {
-        mousex = Math.floor(e.offsetX/cellSize)
-        mousey = Math.floor(e.offsetY/cellSize)
+        mousex = e.offsetX/cellSize
+        mousey = e.offsetY/cellSize
     }
     board.onmouseup = function() {
         mousedown = null
@@ -143,10 +143,10 @@ function update() {
     if (mousedown==1&&doMouse) {
         for (let i = 0; i< mouseSize; i++) {
             for (let j=0; j < mouseSize; j++) {
-                let placex = Math.floor(mousex+i-mouseSize/2);
-                let placey = Math.floor(mousey+j-mouseSize/2);
+                let placex = Math.floor(mousex+i-mouseSize/2+0.5);
+                let placey = Math.floor(mousey+j-mouseSize/2-0.5);
                 if (placex>0&&placex<boardWidth-1&&placey>0&&placey<boardHeight-1)
-                grid[placex][placey] = element
+                {grid[placex][placey] = element}
             }
         }
     }
@@ -156,7 +156,7 @@ function update() {
                 let placex = Math.floor(mousex+i-mouseSize/2);
                 let placey = Math.floor(mousey+j-mouseSize/2);
                 if (placex>0&&placex<boardWidth-1&&placey>0&&placey<boardHeight-1)
-                grid[placex][placey] = "air"
+                {grid[placex][placey] = "air"}
             }
         }
     }
