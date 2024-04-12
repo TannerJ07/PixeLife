@@ -44,21 +44,17 @@ window.onload = function() {
     setGame();
     
     board.onmousedown = function(e) {
-        mousex = e.offsetY
-        mousey = e.offsetX
+        mousex = e.offsetX
+        mousey = e.offsetY
         mousedown = true;
         grid[Math.floor(e.offsetX/cellSize)][Math.floor(e.offsetY/cellSize)] = "sand"
     }
     board.onmousemove = function(e) {
-        mousex, mousey = e.offsetX, e.offsetY
-        if (mousedown) {
-            grid[Math.floor(e.offsetX/cellSize)][Math.floor(e.offsetY/cellSize)] = "sand"
-        }
+        mousex = e.offsetX
+        mousey = e.offsetY
     }
-    board.onmouseup = function(event) {
+    board.onmouseup = function() {
         mousedown = false
-        newGrid[Math.floor(event.offsetX/cellSize)][Math.floor(event.offsetY/cellSize)] = "sand"
-        //console.log(grid)
     }
     //document.addEventListener("contextmenu", event => event.preventDefault());
     
@@ -66,6 +62,9 @@ window.onload = function() {
 }
 
 function update() {
+    if (mousedown) {
+        grid[Math.floor(mousex/cellSize)][Math.floor(mousey/cellSize)] = "sand"
+    }
     updateGrid();
     displayBoard();
 }
@@ -80,7 +79,7 @@ function updateGrid() {
     //newGrid = grid
     for (let j = 0; j < boardHeight; j++) {
         for (let i = 0; i < boardWidth; i++) {
-            if (functions[grid[i][j]] && grid[i][j] !== "air") {
+            if (functions[grid[i][j]]) {
                 functions[grid[i][j]](i,j);
             }
         }
