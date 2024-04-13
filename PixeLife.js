@@ -19,7 +19,10 @@ let mouseSize = 1;
 let mousex, mousey;
 let element = "sand";
 let doMouse = true;
+
 const colors = {
+    fuse:[200,50,0],
+    coal: [30,30,30],
     air: [200,200,200],
     sand: [255,230,179],
     dust: [255,133,0],
@@ -35,6 +38,7 @@ const colors = {
     steam: [80,80,80],
     dirt: [150,40,0],
     mud: [100,40,0],
+    slug: [64,84,16],
     heatBlock: [200,0,0],
     coldBlock: [50,150,255],
     blackHole: [15,15,15],
@@ -47,6 +51,8 @@ const colors = {
     special: [255,0,255],
 };
 const functions = {
+    fuse: moveFuse,
+    coal: moveCoal,
     air: null,
     sand: moveSand,
     dust: moveDust,
@@ -56,6 +62,7 @@ const functions = {
     glass: moveGlass,
     water: moveWater,
     oil: moveOil,
+    slug: moveSlug,
     lava: moveLava,
     fire: moveFire,
     steam: moveSteam,
@@ -68,6 +75,8 @@ const functions = {
     border: null,
 }
 const type = {
+    fuse: [],
+    coal: [],
     air: ["liquid","gas","light","weightless",],
     sand: [],
     ice: ["cold"],
@@ -82,6 +91,7 @@ const type = {
     coldBlock: ["cold","superCold"],
     dirt: [],
     mud: [],
+    slug: [],
     stone: [],
     rock: [],
     border: [],
@@ -89,15 +99,17 @@ const type = {
     duplicator: [],
 }
 const density = {
-    
+    fuse: undefined,
     air: -3,
     sand: 1,
     rock: 2,
     dust: 1,
+    coal: 1,
     glass: -1,
     ice: -1,
     water: 0,
     oil: -2,
+    slug: 1,
     lava: 0,
     fire: -5,
     steam: -4,
@@ -110,13 +122,31 @@ const density = {
     blackHole:undefined,
     duplicator:undefined,
 }
-const elements = ["air","water","lava","fire","dirt","mud","sand","dust","stone","rock","glass","ice","steam","oil","heatBlock","coldBlock","border","blackHole","duplicator"]
+const elements = ["air","water","lava","fire","fuse","dirt","slug","mud","sand","dust","stone","coal","rock","glass","ice","steam","oil","heatBlock","coldBlock","border","blackHole","duplicator"]
 
 function moveSteam(x,y) {
     if (Math.random() >0.98) {
         newGrid[x][y] = "water";
         return
     } else if(!blockClimb(x,y)) {blockSlide(x,y)}
+}
+
+function moveFuse(x,y) {
+    if (typeDetect(x,y,"hot")) {
+        newGrid[x][y] = "fire"
+    }
+}
+
+function moveCoal(x,y) {
+    for (let i = -1; i < 2; i++) {
+        for (let j = -1; j < 2; j++) {
+            if (type[grid[x+i][y+j]].includes("hot")) {
+                newGrid[x][y] = "fire";
+                return
+            }
+        }
+    }
+    if (!blockFall(x,y)) {blockTumble(x,y);}
 }
 
 function moveDirt(x,y) {
@@ -142,6 +172,19 @@ function moveMud(x,y) {
         }
     }
     blockFall(x,y)
+}
+
+function moveSlug(x,y) {
+    let i = Math.floor(Math.random()*3)-1+x
+    let j = Math.floor(Math.random()*3)-1+y
+    if (newGrid[i][j]==="dirt") {
+        newGrid[x][y] = "dirt";
+        newGrid[i][j] = "slug"
+        return
+    }
+    if (!blockFall(x,y)) {
+        !blockTumble(x,y)
+    }
 }
 
 function moveFire(x,y) {
@@ -295,6 +338,26 @@ function blockSlide(x,y) {
         newGrid[x][y] = newGrid[x+direction][y];
         newGrid[x+direction][y] = grid[x][y]
         return true;
+    }
+}
+
+function typeDetect(x,y,elementType) {
+    for (let i = -1; i < 2; i++) {
+        for (let j = -1; j < 2; j++) {
+            if (type[grid[x+i][y+j]].includes(elementType)) {
+                return true
+            }
+        }
+    }
+}
+
+function blockDetect(x,y,block) {
+    for (let i = -1; i < 2; i++) {
+        for (let j = -1; j < 2; j++) {
+            if ([grid[x+i][y+j]]==block) {
+                return true
+            }
+        }
     }
 }
 
