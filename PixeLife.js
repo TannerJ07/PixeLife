@@ -1,7 +1,7 @@
-const boardWidth = 50
-const boardHeight = 50
+const boardWidth = 100
+const boardHeight = boardWidth
 
-const cellSize = 12
+const cellSize = 5
 const canvasSize = boardWidth*cellSize
 
 let grid = {}
@@ -13,7 +13,6 @@ let mousedown = false;
 let mouseSize = 1;
 let mousex, mousey;
 let element = "sand";
-let catagory = "solid";
 let doMouse = true;
 const colors = {
     air: [200,200,200],
@@ -21,9 +20,11 @@ const colors = {
     water: [0,0,255],
     border: [255,0,255],
     fire: [255,0,0],
+    lava: [255,133,0],
     steam: [80,80,80],
     dirt: [150,40,0],
     mud: [100,40,0],
+    heatBlock: [200,0,0],
 
     solid: [70,70,70],
     liquid: [0,0,255],
@@ -35,42 +36,42 @@ const functions = {
     air: null,
     sand: moveSand,
     water: moveWater,
+    lava: moveLava,
     fire: moveFire,
     steam: moveSteam,
     dirt: moveDirt,
     mud: moveMud,
+    heatBlock: null,
     border: null,
 }
 const type = {
     air: ["liquid","gas"],
     sand: [],
     water: ["liquid"],
+    lava: ["liquid","hot","superHot"],
     fire: ["hot"],
     steam: ["gas","liquid"],
+    heatBlock: ["hot"],
     dirt: [],
     mud: [],
     border: [],
 }
-const elementCatagory = {
-    solid: ["sand","dirt","mud","sand",],
-    liquid: ["water"],
-    gas: ["air","steam"],
-    plasma: ["fire"],
-    special: ["border"],
-}
-const catagories = ["solid","liquid","gas","plasma","special",]
+const elements = ["air","water","lava","fire","dirt","mud","sand","steam","heatBlock","border"]
 
 function moveSteam(x,y) {
     let direction = Math.floor(Math.random()*3)-1
     if (Math.random() >0.98) {
         newGrid[x][y] = "water";
         return
-    } else if (newGrid[x+direction][y] == "air") {
-        newGrid[x][y] = "air";
-        newGrid[x+direction][y] = "steam"
-    }else if (newGrid[x][y-1] == "air") {
-        newGrid[x][y] = "air";
+    } else if (type[newGrid[x+direction][y-1]].includes("liquid")) {
+        newGrid[x][y] = newGrid[x+direction][y-1];
+        newGrid[x+direction][y-1] = "steam"
+    } else if (type[newGrid[x][y-1]].includes("liquid")) {
+        newGrid[x][y] = newGrid[x][y-1];
         newGrid[x][y-1] = "steam"
+    } else if (type[newGrid[x+direction][y]].includes("liquid")) {
+        newGrid[x][y] = newGrid[x+direction][y];
+        newGrid[x+direction][y] = "steam"
     }
 }
 
@@ -150,6 +151,25 @@ function moveWater(x,y) {
     }
 }
 
+function moveLava(x,y) {
+    for (let i = -1; i < 2; i++) {
+        for (let j = -1; j < 2; j++) {
+            if (type[grid[x+i][y+j]].includes("superCold")) {
+                newGrid[x][y] = "stone";
+                return
+            }
+        }
+    }
+    let direction = Math.floor(Math.random()*3)-1
+    if (newGrid[x][y+1] == "air") {
+        newGrid[x][y] = "air";
+        newGrid[x][y+1] = "lava"
+    } else if (newGrid[x+direction][y] == "air") {
+        newGrid[x][y] = "air";
+        newGrid[x+direction][y] = "lava"
+    }
+}
+
 function moveSand(x,y) {
     let direction = Math.floor(Math.random()*3)-1
     if (type[newGrid[x][y+1]].includes("liquid") && type[newGrid[x+direction][y+1]].includes("gas")) {
@@ -176,8 +196,8 @@ window.onload = function() {
     board = document.getElementById("board")
     board.height = canvasSize
     board.width = canvasSize
+    selector = document.getElementById("selector");
     context = board.getContext("2d")
-    selector = document.getElementById("selector")
     setGame();
     
     board.onmousedown = function(e) {
@@ -263,50 +283,27 @@ function setGame (){
             grid[i][j] = "air";
         }
     }
-    let catagoryButton;
-    for (let i = 0;i<catagories.length;i++) {
-        catagoryButton =  document.createElement("button");
-        catagoryButton.appendChild(document.createTextNode(catagories[i].toUpperCase()));
+    for (let j = 0; j<elements.length;j++) {
+        
+        button =  document.createElement("button");
+        button.appendChild(document.createTextNode(elements[j].toUpperCase()));
         let color = `rgb(
-            ${colors[catagories[i]][0]},
-            ${colors[catagories[i]][1]},
-            ${colors[catagories[i]][2]})`;
-        catagoryButton.style.color = color;
+            ${colors[elements[j]][0]},
+            ${colors[elements[j]][1]},
+            ${colors[elements[j]][2]})`;
+            button.style.color = color;
         color = `rgba(
-            ${colors[catagories[i]][0]},
-            ${colors[catagories[i]][1]},
-            ${colors[catagories[i]][2]},
+            ${colors[elements[j]][0]},
+            ${colors[elements[j]][1]},
+            ${colors[elements[j]][2]},
             0.5)`
-        catagoryButton.style.backgroundColor = `${color}`;
-        catagoryButton.style.backgroundColor.opacity = 0.2;
-        catagoryButton.addEventListener("click",switchCatagory)
-        catagoryButton.className = "btn-group"
-        catagoryButton.setAttribute("id",catagories[i])
-        let button;
-        for (let j = 0; j<elementCatagory[catagories[i]].length;j++) {
-            
-            button =  document.createElement("button");
-            button.appendChild(document.createTextNode(elementCatagory[catagories[i]][j].toUpperCase()));
-            let color = `rgb(
-                ${colors[elementCatagory[catagories[i]][j]][0]},
-                ${colors[elementCatagory[catagories[i]][j]][1]},
-                ${colors[elementCatagory[catagories[i]][j]][2]})`;
-                button.style.color = color;
-            color = `rgba(
-                ${colors[elementCatagory[catagories[i]][j]][0]},
-                ${colors[elementCatagory[catagories[i]][j]][1]},
-                ${colors[elementCatagory[catagories[i]][j]][2]},
-                0.5)`
-            button.style.backgroundColor = `${color}`;
-            button.style.backgroundColor.opacity = 0.2;
-            button.addEventListener("click",function (event) {
-                element = this.id;
-            });
-            button.setAttribute("id",elementCatagory[catagories[i]][j]);
-            button.style.display = "none"
-            catagoryButton.appendChild(button);
-        }
-        selector.appendChild(catagoryButton);
+        button.style.backgroundColor = `${color}`;
+        button.style.backgroundColor.opacity = 0.2;
+        button.addEventListener("click",function (event) {
+            element = this.id;
+        });
+        button.setAttribute("id",elements[j]);
+        selector.appendChild(button);
     }
     window.addEventListener("keydown", function (event) {
         switch(event.key) {
@@ -321,22 +318,6 @@ function setGame (){
         }
         //console.log(event)
     });
-}
-
-function switchCatagory() {
-    let oldCatagory = document.getElementById(catagory)
-    let children = oldCatagory.children
-    for (let i = 0; i < children.length;i++) {
-        children[i].style.display = "none"
-        oldCatagory.style.minWidth = 0;
-        oldCatagory.style.maxHeight = 30;
-    }
-    children = this.children
-    for (let i = 0; i < children.length;i++) {
-        children[i].style.display = "block"
-        this.style.minWidth= "300px";
-    }
-    catagory = this.id;
 }
 
 function displayBoard () {

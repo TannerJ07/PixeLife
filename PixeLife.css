@@ -12,14 +12,18 @@ body {
 }
 
 #selector {
-    display: flex;
+    display: block;
+    text-align: center;
+    justify-content: center;
+    margin: auto;
+    width: 600px
 }
 
 #selector button {
     margin: 10px;
     font-weight: bold;
     font-size: large;
-    display:run-in;
+    display: inline-block;
     max-height: 30px;
     grid-template-columns: 1fr 1fr 1fr;/**/
 }
@@ -29,11 +33,3 @@ body {
     margin: 90px; /* Adjust spacing between buttons */
     /* Add other styling properties as needed 
 }*/
-
-
-#selector button button {
-    margin: 10px;
-    margin-top: 30px;
-    font-weight: bold;
-    font-size: large;
-}
