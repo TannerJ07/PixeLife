@@ -18,10 +18,11 @@ const colors = {
     air: [200,200,200],
     sand: [255,230,179],
     dust: [255,133,0],
-    stone: [100,100,100],
+    stone: [90,90,90],
+    rock: [110,100,100],
     glass: [200,250,255],
     water: [0,0,255],
-    oil: [20,20,10],
+    oil: [30,30,20],
     border: [255,0,255],
     fire: [255,0,0],
     lava: [255,133,0],
@@ -44,6 +45,7 @@ const functions = {
     sand: moveSand,
     dust: moveDust,
     stone: null,
+    rock: blockFall,
     glass: moveGlass,
     water: moveWater,
     oil: moveOil,
@@ -53,7 +55,7 @@ const functions = {
     dirt: moveDirt,
     mud: moveMud,
     duplicator: moveDuplicator,
-    blackHole: blackHoleMover,
+    blackHole: moveBlackHole,
     heatBlock: null,
     coldBlock: null,
     border: null,
@@ -73,6 +75,7 @@ const type = {
     dirt: [],
     mud: [],
     stone: [],
+    rock: [],
     border: [],
     blackHole: [],
     duplicator: [],
@@ -81,6 +84,7 @@ const density = {
     
     air: -3,
     sand: 1,
+    rock: 2,
     dust: 1,
     glass: -1,
     water: 0,
@@ -88,16 +92,16 @@ const density = {
     lava: 0,
     fire: -5,
     steam: -4,
-    heatBlock: null,
-    coldBlock: null,
+    heatBlock: undefined,
+    coldBlock: undefined,
     dirt: 0,
     mud: 0,
-    stone:null,
-    border:null,
-    blackHole:null,
-    duplicator:null,
+    stone:undefined,
+    border:undefined,
+    blackHole:undefined,
+    duplicator:undefined,
 }
-const elements = ["air","water","lava","fire","dirt","mud","sand","dust","stone","glass","steam","oil","heatBlock","coldBlock","border","blackHole","duplicator"]
+const elements = ["air","water","lava","fire","dirt","mud","sand","dust","stone","rock","glass","steam","oil","heatBlock","coldBlock","border","blackHole","duplicator"]
 
 function moveSteam(x,y) {
     if (Math.random() >0.98) {
@@ -159,7 +163,7 @@ function moveOil(x,y) {
             }
         }
     }
-    if (!blockFall) {blockSlide}
+    if (!blockFall(x,y)) {blockSlide(x,y)}
 }
 
 function moveLava(x,y) {
@@ -194,10 +198,10 @@ function moveGlass(x,y) {
     if (blockFall(x,y)&&!type[grid[x][y+2]].includes("liquid")) {newGrid[x][y+1]="air"}
 }
 
-function blackHoleMover(x,y) {
+function moveBlackHole(x,y) {
     for (let i = -1; i < 2; i++) {
         for (let j = -1; j < 2; j++) {
-            if (newGrid[x+i][y+j] !== "blackHole") {
+            if (newGrid[x+i][y+j] !== "blackHole"&&newGrid[x+i][y+j] !== "border") {
                 newGrid[x+i][y+j] = "air";
             }
         }
@@ -211,7 +215,7 @@ function moveDuplicator(x,y) {
 //-----No touchie-----//
 
 function blockFall(x,y) {
-    let direction = Math.floor(Math.random())*3-1
+    let direction = Math.floor(Math.random()*2)*2-1
     if (type[newGrid[x][y+1]].includes("liquid")&&density[newGrid[x][y+1]]<density[grid[x][y]]&&density[newGrid[x+direction][y+1]]<=density[grid[x][y+1]]) {
         newGrid[x][y] = newGrid[x+direction][y+1];
         newGrid[x+direction][y+1] = newGrid[x][y+1];
@@ -225,14 +229,15 @@ function blockFall(x,y) {
 }
 
 function blockRise(x,y) {
-    let direction = Math.floor(Math.random())*3-1
+    console.log(undefined>=0)
+    let direction = Math.floor(Math.random()*2)*2-1
     if (type[newGrid[x][y-1]].includes("liquid")&&density[newGrid[x][y-1]]>density[grid[x][y]]&&density[newGrid[x+direction][y-1]]>=density[grid[x][y-1]]) {
         newGrid[x][y] = newGrid[x+direction][y-1];
         newGrid[x+direction][y-1] = newGrid[x][y-1];
         newGrid[x][y-1] = grid[x][y]
         return true;
     } else if (type[newGrid[x][y-1]].includes("liquid")&&density[newGrid[x][y-1]]>density[grid[x][y]]) {
-        newGrid[x][y] = newGrid[x][y+1];
+        newGrid[x][y] = newGrid[x][y-1];
         newGrid[x][y-1] = grid[x][y];
         return true;
     } 
@@ -303,8 +308,8 @@ function update() {
     if (mousedown==2&&doMouse) {
         for (let i = 0; i< mouseSize; i++) {
             for (let j=0; j < mouseSize; j++) {
-                let placex = Math.floor(mousex+i-mouseSize/2);
-                let placey = Math.floor(mousey+j-mouseSize/2);
+                let placex = Math.floor(mousex+i-mouseSize/2+0.5);
+                let placey = Math.floor(mousey+j-mouseSize/2+0.5);
                 if (placex>0&&placex<boardWidth-1&&placey>0&&placey<boardHeight-1)
                 {grid[placex][placey] = "air"}
             }
