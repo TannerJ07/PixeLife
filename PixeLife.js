@@ -1,5 +1,5 @@
 const canvasSize = 500
-const cellSize = 2
+const cellSize = 5
 const boardHeight = canvasSize/cellSize
 const boardWidth = canvasSize/cellSize
 
@@ -26,6 +26,7 @@ const colors = {
     stone: [90,90,90],
     rock: [110,100,100],
     glass: [200,250,255],
+    ice: [100,200,255],
     water: [0,0,255],
     oil: [30,30,20],
     border: [255,0,255],
@@ -35,7 +36,7 @@ const colors = {
     dirt: [150,40,0],
     mud: [100,40,0],
     heatBlock: [200,0,0],
-    coldBlock: [50,200,255],
+    coldBlock: [50,150,255],
     blackHole: [15,15,15],
     duplicator: [150,0,255],
 
@@ -50,6 +51,7 @@ const functions = {
     sand: moveSand,
     dust: moveDust,
     stone: null,
+    ice: moveIce,
     rock: blockFall,
     glass: moveGlass,
     water: moveWater,
@@ -68,9 +70,10 @@ const functions = {
 const type = {
     air: ["liquid","gas","light","weightless",],
     sand: [],
+    ice: ["cold"],
     dust: [],
     glass: [],
-    water: ["liquid",],
+    water: ["liquid","cold"],
     oil: ["liquid",],
     lava: ["liquid","hot","superHot"],
     fire: ["hot","liquid",],
@@ -92,6 +95,7 @@ const density = {
     rock: 2,
     dust: 1,
     glass: -1,
+    ice: -1,
     water: 0,
     oil: -2,
     lava: 0,
@@ -106,7 +110,7 @@ const density = {
     blackHole:undefined,
     duplicator:undefined,
 }
-const elements = ["air","water","lava","fire","dirt","mud","sand","dust","stone","rock","glass","steam","oil","heatBlock","coldBlock","border","blackHole","duplicator"]
+const elements = ["air","water","lava","fire","dirt","mud","sand","dust","stone","rock","glass","ice","steam","oil","heatBlock","coldBlock","border","blackHole","duplicator"]
 
 function moveSteam(x,y) {
     if (Math.random() >0.98) {
@@ -156,6 +160,14 @@ function moveWater(x,y) {
             }
         }
     }
+    for (let i = -1; i < 2; i++) {
+        for (let j = -1; j < 2; j++) {
+            if (type[grid[x+i][y+j]].includes("superCold")) {
+                newGrid[x][y] = "ice";
+                return
+            }
+        }
+    }
     if (!blockFall(x,y)) {blockSlide(x,y)}
 }
 
@@ -174,13 +186,25 @@ function moveOil(x,y) {
 function moveLava(x,y) {
     for (let i = -1; i < 2; i++) {
         for (let j = -1; j < 2; j++) {
-            if (type[grid[x+i][y+j]].includes("superCold")) {
+            if (type[grid[x+i][y+j]].includes("cold")) {
                 newGrid[x][y] = "stone";
                 return
             }
         }
     }
     if (!blockFall(x,y)) {blockSlide(x,y)}
+}
+
+function moveIce(x,y) {
+    for (let i = -1; i < 2; i++) {
+        for (let j = -1; j < 2; j++) {
+            if (type[grid[x+i][y+j]].includes("hot")) {
+                newGrid[x][y] = "water";
+                return
+            }
+        }
+    }
+    if (!blockFall(x,y)) {blockRise(x,y)}
 }
 
 function moveSand(x,y) {
