@@ -17,9 +17,11 @@ let doMouse = true;
 const colors = {
     air: [200,200,200],
     sand: [255,230,179],
+    dust: [255,133,0],
     stone: [100,100,100],
+    glass: [200,250,255],
     water: [0,0,255],
-    oil: [10,10,0],
+    oil: [20,20,10],
     border: [255,0,255],
     fire: [255,0,0],
     lava: [255,133,0],
@@ -28,6 +30,7 @@ const colors = {
     mud: [100,40,0],
     heatBlock: [200,0,0],
     coldBlock: [50,200,255],
+    blackHole: [15,15,15],
     duplicator: [150,0,255],
 
     solid: [70,70,70],
@@ -39,7 +42,9 @@ const colors = {
 const functions = {
     air: null,
     sand: moveSand,
+    dust: moveDust,
     stone: null,
+    glass: moveGlass,
     water: moveWater,
     oil: moveOil,
     lava: moveLava,
@@ -48,31 +53,38 @@ const functions = {
     dirt: moveDirt,
     mud: moveMud,
     duplicator: moveDuplicator,
+    blackHole: blackHoleMover,
     heatBlock: null,
+    coldBlock: null,
     border: null,
 }
 const type = {
     air: ["liquid","gas","light","weightless",],
-    sand: [1],
-    water: ["liquid","weight",],
-    oil: ["liquid","light",],
+    sand: [],
+    dust: [],
+    glass: [],
+    water: ["liquid",],
+    oil: ["liquid",],
     lava: ["liquid","hot","superHot"],
     fire: ["hot","liquid",],
     steam: ["gas","liquid",],
-    heatBlock: ["hot",],
+    heatBlock: ["hot","superHot"],
     coldBlock: ["cold","superCold"],
     dirt: [],
     mud: [],
     stone: [],
     border: [],
+    blackHole: [],
     duplicator: [],
 }
 const density = {
     
     air: -3,
     sand: 1,
+    dust: 1,
+    glass: -1,
     water: 0,
-    oil: -1,
+    oil: -2,
     lava: 0,
     fire: -5,
     steam: -4,
@@ -82,9 +94,10 @@ const density = {
     mud: 0,
     stone:null,
     border:null,
+    blackHole:null,
     duplicator:null,
 }
-const elements = ["air","water","lava","fire","dirt","mud","sand","stone","steam","oil","heatBlock","coldBlock","border","duplicator"]
+const elements = ["air","water","lava","fire","dirt","mud","sand","dust","stone","glass","steam","oil","heatBlock","coldBlock","border","blackHole","duplicator"]
 
 function moveSteam(x,y) {
     if (Math.random() >0.98) {
@@ -162,7 +175,33 @@ function moveLava(x,y) {
 }
 
 function moveSand(x,y) {
+    for (let i = -1; i < 2; i++) {
+        for (let j = -1; j < 2; j++) {
+            if (type[grid[x+i][y+j]].includes("superHot")) {
+                newGrid[x][y] = "glass";
+                return
+            }
+        }
+    }
     if (!blockFall(x,y)) {blockTumble(x,y);}
+}
+
+function moveDust(x,y) {
+    if (!blockTumble(x,y)) {blockFall(x,y)}
+}
+
+function moveGlass(x,y) {
+    if (blockFall(x,y)&&!type[grid[x][y+2]].includes("liquid")) {newGrid[x][y+1]="air"}
+}
+
+function blackHoleMover(x,y) {
+    for (let i = -1; i < 2; i++) {
+        for (let j = -1; j < 2; j++) {
+            if (newGrid[x+i][y+j] !== "blackHole") {
+                newGrid[x+i][y+j] = "air";
+            }
+        }
+    }
 }
 
 function moveDuplicator(x,y) {
