@@ -17,7 +17,9 @@ let doMouse = true;
 const colors = {
     air: [200,200,200],
     sand: [255,230,179],
+    stone: [100,100,100],
     water: [0,0,255],
+    oil: [10,10,0],
     border: [255,0,255],
     fire: [255,0,0],
     lava: [255,133,0],
@@ -25,6 +27,7 @@ const colors = {
     dirt: [150,40,0],
     mud: [100,40,0],
     heatBlock: [200,0,0],
+    coldBlock: [50,200,255],
     duplicator: [150,0,255],
 
     solid: [70,70,70],
@@ -36,7 +39,9 @@ const colors = {
 const functions = {
     air: null,
     sand: moveSand,
+    stone: null,
     water: moveWater,
+    oil: moveOil,
     lava: moveLava,
     fire: moveFire,
     steam: moveSteam,
@@ -47,35 +52,45 @@ const functions = {
     border: null,
 }
 const type = {
-    air: ["liquid","gas"],
-    sand: [],
-    water: ["liquid"],
+    air: ["liquid","gas","light","weightless",],
+    sand: [1],
+    water: ["liquid","weight",],
+    oil: ["liquid","light",],
     lava: ["liquid","hot","superHot"],
-    fire: ["hot"],
-    steam: ["gas","liquid"],
-    heatBlock: ["hot"],
+    fire: ["hot","liquid",],
+    steam: ["gas","liquid",],
+    heatBlock: ["hot",],
+    coldBlock: ["cold","superCold"],
     dirt: [],
     mud: [],
+    stone: [],
     border: [],
     duplicator: [],
 }
-const elements = ["air","water","lava","fire","dirt","mud","sand","steam","heatBlock","border","duplicator"]
+const density = {
+    
+    air: -3,
+    sand: 1,
+    water: 0,
+    oil: -1,
+    lava: 0,
+    fire: -5,
+    steam: -4,
+    heatBlock: null,
+    coldBlock: null,
+    dirt: 0,
+    mud: 0,
+    stone:null,
+    border:null,
+    duplicator:null,
+}
+const elements = ["air","water","lava","fire","dirt","mud","sand","stone","steam","oil","heatBlock","coldBlock","border","duplicator"]
 
 function moveSteam(x,y) {
-    let direction = Math.floor(Math.random()*3)-1
     if (Math.random() >0.98) {
         newGrid[x][y] = "water";
         return
-    } else if (type[newGrid[x+direction][y-1]].includes("liquid")) {
-        newGrid[x][y] = newGrid[x+direction][y-1];
-        newGrid[x+direction][y-1] = "steam"
-    } else if (type[newGrid[x][y-1]].includes("liquid")) {
-        newGrid[x][y] = newGrid[x][y-1];
-        newGrid[x][y-1] = "steam"
-    } else if (type[newGrid[x+direction][y]].includes("liquid")) {
-        newGrid[x][y] = newGrid[x+direction][y];
-        newGrid[x+direction][y] = "steam"
-    }
+    } else if(!blockClimb(x,y)) {blockSlide(x,y)}
 }
 
 function moveDirt(x,y) {
@@ -88,18 +103,7 @@ function moveDirt(x,y) {
             }
         }
     }
-    let direction = Math.floor(Math.random()*3)-1
-    if (type[newGrid[x][y+1]].includes("liquid") && type[newGrid[x+direction][y+1]].includes("gas")) {
-        newGrid[x][y] = grid[x+direction][y+1];
-        newGrid[x+direction][y+1] = grid[x][y+1];
-        newGrid[x][y+1] = "dirt"
-    } else if (type[newGrid[x][y+1]].includes("liquid")) {
-        newGrid[x][y] = grid[x][y+1];
-        newGrid[x][y+1] = "dirt"
-    } else if (type[newGrid[x+direction][y+1]].includes("liquid")) {
-        newGrid[x][y] = grid[x+direction][y+1];
-        newGrid[x+direction][y+1] = "dirt"
-    }
+    if (!blockFall(x,y)) {blockTumble(x,y)}
 }
 
 function moveMud(x,y) {
@@ -111,28 +115,14 @@ function moveMud(x,y) {
             }
         }
     }
-    let direction = Math.floor(Math.random()*3)-1
-    if (type[newGrid[x][y+1]].includes("liquid") && type[newGrid[x+direction][y+1]].includes("gas")) {
-        newGrid[x][y] = grid[x+direction][y+1];
-        newGrid[x+direction][y+1] = grid[x][y+1];
-        newGrid[x][y+1] = "mud"
-    } else if (type[newGrid[x][y+1]].includes("liquid")) {
-        newGrid[x][y] = grid[x][y+1];
-        newGrid[x][y+1] = "mud" }
+    blockFall(x,y)
 }
 
 function moveFire(x,y) {
-    let direction = Math.floor(Math.random()*3)-1
     if (Math.random() >0.93) {
         newGrid[x][y] = "air";
         return
-    } else if (newGrid[x+direction][y-1] == "air") {
-        newGrid[x][y] = "air";
-        newGrid[x+direction][y-1] = "fire"
-    }else if (newGrid[x][y-1] == "air") {
-        newGrid[x][y] = "air";
-        newGrid[x][y-1] = "fire"
-    }
+    } else if (!blockClimb(x,y)) {blockRise(x,y)}
 }
 
 function moveWater(x,y) {
@@ -144,14 +134,19 @@ function moveWater(x,y) {
             }
         }
     }
-    let direction = Math.floor(Math.random()*3)-1
-    if (newGrid[x][y+1] == "air") {
-        newGrid[x][y] = "air";
-        newGrid[x][y+1] = "water"
-    } else if (newGrid[x+direction][y] == "air") {
-        newGrid[x][y] = "air";
-        newGrid[x+direction][y] = "water"
+    if (!blockFall(x,y)) {blockSlide(x,y)}
+}
+
+function moveOil(x,y) {
+    for (let i = -1; i < 2; i++) {
+        for (let j = -1; j < 2; j++) {
+            if (type[grid[x+i][y+j]].includes("hot")) {
+                newGrid[x][y] = "fire";
+                return
+            }
+        }
     }
+    if (!blockFall) {blockSlide}
 }
 
 function moveLava(x,y) {
@@ -163,34 +158,11 @@ function moveLava(x,y) {
             }
         }
     }
-    let direction = Math.floor(Math.random()*3)-1
-    if (newGrid[x][y+1] == "air") {
-        newGrid[x][y] = "air";
-        newGrid[x][y+1] = "lava"
-    } else if (newGrid[x+direction][y] == "air") {
-        newGrid[x][y] = "air";
-        newGrid[x+direction][y] = "lava"
-    }
+    if (!blockFall(x,y)) {blockSlide(x,y)}
 }
 
 function moveSand(x,y) {
-    let direction = Math.floor(Math.random()*3)-1
-    if (type[newGrid[x][y+1]].includes("liquid") && type[newGrid[x+direction][y+1]].includes("gas")) {
-        newGrid[x][y] = grid[x+direction][y+1];
-        newGrid[x+direction][y+1] = grid[x][y+1];
-        newGrid[x][y+1] = "sand"
-    } else 
-    if (type[newGrid[x][y+1]].includes("liquid") && type[newGrid[x+direction][y+1]].includes("gas")) {
-        newGrid[x][y] = grid[x+direction][y+1];
-        newGrid[x+direction][y+1] = grid[x][y+1];
-        newGrid[x][y+1] = "sand"
-    } else if (type[newGrid[x][y+1]].includes("liquid")) {
-        newGrid[x][y] = grid[x][y+1];
-        newGrid[x][y+1] = "sand"
-    } else if (type[newGrid[x+direction][y+1]].includes("liquid")&&type[newGrid[x+direction][y]].includes("liquid")) {
-        newGrid[x][y] = grid[x+direction][y+1];
-        newGrid[x+direction][y+1] = "sand"
-    }
+    if (!blockFall(x,y)) {blockTumble(x,y);}
 }
 
 function moveDuplicator(x,y) {
@@ -198,6 +170,61 @@ function moveDuplicator(x,y) {
 }
 
 //-----No touchie-----//
+
+function blockFall(x,y) {
+    let direction = Math.floor(Math.random())*3-1
+    if (type[newGrid[x][y+1]].includes("liquid")&&density[newGrid[x][y+1]]<density[grid[x][y]]&&density[newGrid[x+direction][y+1]]<=density[grid[x][y+1]]) {
+        newGrid[x][y] = newGrid[x+direction][y+1];
+        newGrid[x+direction][y+1] = newGrid[x][y+1];
+        newGrid[x][y+1] = grid[x][y]
+        return true;
+    } else if (type[newGrid[x][y+1]].includes("liquid")&&density[newGrid[x][y+1]]<density[grid[x][y]]) {
+        newGrid[x][y] = newGrid[x][y+1];
+        newGrid[x][y+1] = grid[x][y];
+        return true;
+    } 
+}
+
+function blockRise(x,y) {
+    let direction = Math.floor(Math.random())*3-1
+    if (type[newGrid[x][y-1]].includes("liquid")&&density[newGrid[x][y-1]]>density[grid[x][y]]&&density[newGrid[x+direction][y-1]]>=density[grid[x][y-1]]) {
+        newGrid[x][y] = newGrid[x+direction][y-1];
+        newGrid[x+direction][y-1] = newGrid[x][y-1];
+        newGrid[x][y-1] = grid[x][y]
+        return true;
+    } else if (type[newGrid[x][y-1]].includes("liquid")&&density[newGrid[x][y-1]]>density[grid[x][y]]) {
+        newGrid[x][y] = newGrid[x][y+1];
+        newGrid[x][y-1] = grid[x][y];
+        return true;
+    } 
+}
+
+function blockTumble(x,y) {
+    let direction = Math.floor(Math.random()*2)*2-1
+    if (type[newGrid[x+direction][y+1]].includes("liquid")&&density[newGrid[x+direction][y+1]]<density[grid[x][y]]&&density[newGrid[x+direction][y]]<density[grid[x][y]]) {
+        newGrid[x][y] = newGrid[x+direction][y+1];
+        newGrid[x+direction][y+1] = grid[x][y];
+        return true;
+    } 
+}
+
+function blockClimb(x,y) {
+    let direction = Math.floor(Math.random()*2)*2-1
+    if (type[newGrid[x+direction][y-1]].includes("liquid")&&density[newGrid[x+direction][y-1]]>density[grid[x][y]]&&density[newGrid[x+direction][y]]>density[grid[x][y]]) {
+        newGrid[x][y] = newGrid[x+direction][y-1];
+        newGrid[x+direction][y-1] = grid[x][y];
+        return true;
+    } 
+}
+
+function blockSlide(x,y) {
+    let direction = Math.floor(Math.random()*2)*2-1
+    if (type[newGrid[x+direction][y]].includes("liquid")&&density[newGrid[x+direction][y]]<density[grid[x][y]]) {
+        newGrid[x][y] = newGrid[x+direction][y];
+        newGrid[x+direction][y] = grid[x][y]
+        return true;
+    }
+}
 
 window.onload = function() {
     board = document.getElementById("board")
