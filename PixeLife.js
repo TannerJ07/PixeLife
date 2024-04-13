@@ -1,7 +1,7 @@
 const boardWidth = 100
 const boardHeight = boardWidth
 
-const cellSize = 5
+const cellSize = 8
 const canvasSize = boardWidth*cellSize
 
 let grid = {}
@@ -25,6 +25,7 @@ const colors = {
     dirt: [150,40,0],
     mud: [100,40,0],
     heatBlock: [200,0,0],
+    duplicator: [150,0,255],
 
     solid: [70,70,70],
     liquid: [0,0,255],
@@ -41,6 +42,7 @@ const functions = {
     steam: moveSteam,
     dirt: moveDirt,
     mud: moveMud,
+    duplicator: moveDuplicator,
     heatBlock: null,
     border: null,
 }
@@ -55,8 +57,9 @@ const type = {
     dirt: [],
     mud: [],
     border: [],
+    duplicator: [],
 }
-const elements = ["air","water","lava","fire","dirt","mud","sand","steam","heatBlock","border"]
+const elements = ["air","water","lava","fire","dirt","mud","sand","steam","heatBlock","border","duplicator"]
 
 function moveSteam(x,y) {
     let direction = Math.floor(Math.random()*3)-1
@@ -184,10 +187,14 @@ function moveSand(x,y) {
     } else if (type[newGrid[x][y+1]].includes("liquid")) {
         newGrid[x][y] = grid[x][y+1];
         newGrid[x][y+1] = "sand"
-    } else if (type[newGrid[x+direction][y+1]].includes("liquid")) {
+    } else if (type[newGrid[x+direction][y+1]].includes("liquid")&&type[newGrid[x+direction][y]].includes("liquid")) {
         newGrid[x][y] = grid[x+direction][y+1];
         newGrid[x+direction][y+1] = "sand"
     }
+}
+
+function moveDuplicator(x,y) {
+    newGrid[x][y+1] = grid[x][y-1]
 }
 
 //-----No touchie-----//
@@ -221,7 +228,7 @@ function update() {
         for (let i = 0; i< mouseSize; i++) {
             for (let j=0; j < mouseSize; j++) {
                 let placex = Math.floor(mousex+i-mouseSize/2+0.5);
-                let placey = Math.floor(mousey+j-mouseSize/2-0.5);
+                let placey = Math.floor(mousey+j-mouseSize/2+0.5);
                 if (placex>0&&placex<boardWidth-1&&placey>0&&placey<boardHeight-1)
                 {grid[placex][placey] = element}
             }
