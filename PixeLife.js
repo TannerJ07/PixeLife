@@ -1,8 +1,13 @@
-const boardWidth = 100
+const canvasSize = 500
+const cellSize = 2
+const boardHeight = canvasSize/cellSize
+const boardWidth = canvasSize/cellSize
+
+/*const boardWidth = 100
 const boardHeight = boardWidth
 
 const cellSize = 8
-const canvasSize = boardWidth*cellSize
+const canvasSize = boardWidth*cellSize*/
 
 let grid = {}
 let newGrid = {};
@@ -229,7 +234,6 @@ function blockFall(x,y) {
 }
 
 function blockRise(x,y) {
-    console.log(undefined>=0)
     let direction = Math.floor(Math.random()*2)*2-1
     if (type[newGrid[x][y-1]].includes("liquid")&&density[newGrid[x][y-1]]>density[grid[x][y]]&&density[newGrid[x+direction][y-1]]>=density[grid[x][y-1]]) {
         newGrid[x][y] = newGrid[x+direction][y-1];
@@ -292,16 +296,28 @@ window.onload = function() {
     }
     board.oncontextmenu = function () { return false; }
     setInterval(update,1000/60);
+    context.fillStyle= `rgb(
+        ${colors["border"][0]},
+        ${colors["border"][1]},
+        ${colors["border"][2]})`;
+    context.fillRect(0,0,canvasSize,canvasSize);
+    context.fillStyle= `rgb(
+        ${colors["air"][0]},
+        ${colors["air"][1]},
+        ${colors["air"][2]})`;
+    context.fillRect(cellSize,cellSize,canvasSize-cellSize*2,canvasSize-cellSize*2);
 }
 
 function update() {
+    
+    updateGrid();
     if (mousedown==1&&doMouse) {
         for (let i = 0; i< mouseSize; i++) {
             for (let j=0; j < mouseSize; j++) {
                 let placex = Math.floor(mousex+i-mouseSize/2+0.5);
                 let placey = Math.floor(mousey+j-mouseSize/2+0.5);
                 if (placex>0&&placex<boardWidth-1&&placey>0&&placey<boardHeight-1)
-                {grid[placex][placey] = element}
+                {newGrid[placex][placey] = element}
             }
         }
     }
@@ -311,7 +327,7 @@ function update() {
                 let placex = Math.floor(mousex+i-mouseSize/2+0.5);
                 let placey = Math.floor(mousey+j-mouseSize/2+0.5);
                 if (placex>0&&placex<boardWidth-1&&placey>0&&placey<boardHeight-1)
-                {grid[placex][placey] = "air"}
+                {newGrid[placex][placey] = "air"}
             }
         }
     }
@@ -320,22 +336,10 @@ function update() {
     } else {
         doMouse = true;
     }
-    
-    updateGrid();
     displayBoard();
 }
 
 function updateGrid() {
-    for (let i = 0; i < boardHeight; i++) {
-        newGrid[i] = {};
-        for (let j = 0; j < boardWidth; j++) {
-            if (i==0||j==0||i==boardWidth-1||j==boardHeight-1) {
-                newGrid[i][j] = "border";
-            } else {
-                newGrid[i][j] = grid[i][j];
-            }
-        }
-    }//*/
     //newGrid = grid
     for (let j = 0; j < boardHeight; j++) {
         for (let i = 0; i < boardWidth; i++) {
@@ -345,9 +349,9 @@ function updateGrid() {
         }
     }
     for (let i = 0; i < boardHeight; i++) {
-        grid[i] = {};
+        //grid[i] = {};
         for (let j = 0; j < boardWidth; j++) {
-            grid[i][j] = newGrid[i][j];
+            //grid[i][j] = newGrid[i][j];
         }
     }
 }
@@ -357,8 +361,14 @@ function setGame (){
     context = board.getContext("2d")
     for(let i = 0;i<boardWidth;i++) {
         grid[i] = {};
+        newGrid[i] = {};
         for(let j =0;j<boardHeight;j++) {
+            if (i==0||j==0||i==boardWidth-1||j==boardHeight-1) {
+                grid[i][j] = "border";
+                newGrid[i][j] = "border";
+            } else{
             grid[i][j] = "air";
+            newGrid[i][j] = "air";}
         }
     }
     for (let j = 0; j<elements.length;j++) {
@@ -399,14 +409,15 @@ function setGame (){
 }
 
 function displayBoard () {
-    context.fillRect(0,0,20,20);
     for (let i = 0; i<boardWidth; i++) {
         for (let j = 0; j < boardHeight; j++) {
+            if (grid[i][j] !== newGrid[i][j]){
             context.fillStyle= `rgb(
-                ${colors[grid[i][j]][0]},
-                ${colors[grid[i][j]][1]},
-                ${colors[grid[i][j]][2]})`;
-            context.fillRect(i*cellSize,j*cellSize,cellSize,cellSize);
+                ${colors[newGrid[i][j]][0]},
+                ${colors[newGrid[i][j]][1]},
+                ${colors[newGrid[i][j]][2]})`;
+            context.fillRect(i*cellSize,j*cellSize,cellSize,cellSize);}
+            grid[i][j] = newGrid[i][j]
         }
     }
 }
