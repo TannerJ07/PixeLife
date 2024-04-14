@@ -201,10 +201,6 @@ function moveWater(x,y) {
                 newGrid[x][y] = "steam";
                 return
             }
-        }
-    }
-    for (let i = -1; i < 2; i++) {
-        for (let j = -1; j < 2; j++) {
             if (type[grid[x+i][y+j]].includes("superCold")) {
                 newGrid[x][y] = "ice";
                 return
@@ -281,7 +277,9 @@ function moveBlackHole(x,y) {
 }
 
 function moveDuplicator(x,y) {
-    newGrid[x][y+1] = grid[x][y-1]
+    if (newGrid[x][y+1] !== "border") {
+        newGrid[x][y+1] = grid[x][y-1]
+    }
 }
 
 //-----No touchie-----//
@@ -378,10 +376,10 @@ window.onload = function() {
         mousex = e.offsetX/cellSize
         mousey = e.offsetY/cellSize
     }
-    board.onmouseup = function() {
+    window.onmouseup = function() {
         mousedown = null
     }
-    board.oncontextmenu = function () { return false; }
+    window.oncontextmenu = function () { return false; }
     setInterval(update,1000/60);
     context.fillStyle= `rgb(
         ${colors["border"][0]},
@@ -423,6 +421,7 @@ function update() {
     } else {
         doMouse = true;
     }
+    
     displayBoard();
 }
 
@@ -433,12 +432,6 @@ function updateGrid() {
             if (functions[grid[i][j]] && grid[i][j] == newGrid[i][j]) {
                 functions[grid[i][j]](i,j);
             }
-        }
-    }
-    for (let i = 0; i < boardHeight; i++) {
-        //grid[i] = {};
-        for (let j = 0; j < boardWidth; j++) {
-            //grid[i][j] = newGrid[i][j];
         }
     }
 }
@@ -496,15 +489,24 @@ function setGame (){
 }
 
 function displayBoard () {
-    for (let i = 0; i<boardWidth; i++) {
-        for (let j = 0; j < boardHeight; j++) {
+    for (let j = 0; j<boardWidth; j++) {
+        for (let i = 0; i < boardHeight; i++) {
+            const currTile = newGrid[i][j]
             if (grid[i][j] !== newGrid[i][j]){
-            context.fillStyle= `rgb(
-                ${colors[newGrid[i][j]][0]},
-                ${colors[newGrid[i][j]][1]},
-                ${colors[newGrid[i][j]][2]})`;
-            context.fillRect(i*cellSize,j*cellSize,cellSize,cellSize);}
-            grid[i][j] = newGrid[i][j]
+                let width = 1;
+                while(true) {
+                    if (newGrid[i+width][j] !== currTile||i+1<boardWidth) {
+                        break
+                    }
+                    width++;
+                    i++;
+                }
+                context.fillStyle= `rgb(
+                    ${colors[currTile][0]},
+                    ${colors[currTile][1]},
+                    ${colors[currTile][2]})`;
+                context.fillRect(i*cellSize,j*cellSize,cellSize*width,cellSize);}
+                grid[i][j] = currTile;
         }
     }
 }
