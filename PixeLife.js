@@ -15,8 +15,11 @@ let context;
 let board;
 let selector
 let mousedown = false;
+let freezeMouse = false
 let mouseSize = 1;
 let mousex, mousey;
+let ogMousex, ogMousey;
+let lock;
 let element = "sand";
 let doMouse = true;
 
@@ -368,16 +371,30 @@ window.onload = function() {
     setGame();
     
     board.onmousedown = function(e) {
+        lock = null;
         mousex = e.offsetX/cellSize
         mousey = e.offsetY/cellSize
+        ogMousex = e.offsetX
+        ogMousey = e.offsetY
         mousedown = e.buttons;
     }
     board.onmousemove = function(e) {
+        if (e.shiftKey) {
+            if (lock===0||(lock!==1&&Math.abs(e.offsetX-ogMousex)>cellSize)) {
+                mousex = e.offsetX/cellSize;
+                lock = 0;
+            }
+            if (lock===1||(lock!==0&&Math.abs(e.offsetY-ogMousey)>cellSize)){
+                mousey = e.offsetY/cellSize;
+                lock = 1;
+            }
+        } else{
         mousex = e.offsetX/cellSize
-        mousey = e.offsetY/cellSize
+        mousey = e.offsetY/cellSize}
     }
     window.onmouseup = function() {
         mousedown = null
+        lock = null;
     }
     window.oncontextmenu = function () { return false; }
     setInterval(update,1000/60);
