@@ -474,17 +474,20 @@ function setGame (){
         
         button =  document.createElement("button");
         button.appendChild(document.createTextNode(elements[j].toUpperCase()));
-        let color = `rgb(
-            ${colors[elements[j]][0]},
-            ${colors[elements[j]][1]},
-            ${colors[elements[j]][2]})`;
-            button.style.color = color;
-        color = `rgba(
+        let color = `rgba(
             ${colors[elements[j]][0]},
             ${colors[elements[j]][1]},
             ${colors[elements[j]][2]},
             0.5)`
         button.style.backgroundColor = `${color}`;
+        if ((colors[elements[j]][0]+colors[elements[j]][1]+colors[elements[j]][2])<100) {
+            color = `rgb(100,100,100)`;
+        } else {
+            color = `rgb(
+            ${colors[elements[j]][0]},
+            ${colors[elements[j]][1]},
+            ${colors[elements[j]][2]})`;}
+        button.style.color = color;
         button.style.backgroundColor.opacity = 0.2;
         button.addEventListener("click",function (event) {
             element = this.id;
