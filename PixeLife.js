@@ -1,5 +1,5 @@
 const canvasSize = 500
-const cellSize = 5
+const cellSize = 4
 const boardHeight = canvasSize/cellSize
 const boardWidth = canvasSize/cellSize
 
@@ -9,10 +9,14 @@ const boardHeight = boardWidth
 const cellSize = 8
 const canvasSize = boardWidth*cellSize*/
 
+
 let grid = {}
 let newGrid = {};
-let context;
-let board;
+let board = document.getElementById("board");
+let context = board.getContext("2d")
+const bufferImage = context.createImageData(canvasSize,canvasSize)
+
+
 let selector
 let mousedown = false;
 let freezeMouse = false
@@ -363,11 +367,9 @@ function blockDetect(x,y,block) {
 }
 
 window.onload = function() {
-    board = document.getElementById("board")
     board.height = canvasSize
     board.width = canvasSize
     selector = document.getElementById("selector");
-    context = board.getContext("2d")
     setGame();
     
     board.onmousedown = function(e) {
@@ -506,24 +508,14 @@ function setGame (){
 }
 
 function displayBoard () {
-    for (let j = 0; j<boardWidth; j++) {
-        for (let i = 0; i < boardHeight; i++) {
-            const currTile = newGrid[i][j]
-            if (grid[i][j] !== newGrid[i][j]){
-                let width = 1;
-                while(true) {
-                    if (newGrid[i+width][j] !== currTile||i+1<boardWidth) {
-                        break
-                    }
-                    width++;
-                    i++;
-                }
-                context.fillStyle= `rgb(
-                    ${colors[currTile][0]},
-                    ${colors[currTile][1]},
-                    ${colors[currTile][2]})`;
-                context.fillRect(i*cellSize,j*cellSize,cellSize*width,cellSize);}
-                grid[i][j] = currTile;
+    for (let i = 0; i < canvasSize*canvasSize; i++) {
+        let x = Math.floor(i/cellSize)%boardWidth
+        let y = Math.floor(i/canvasSize/cellSize)
+        bufferImage.data[4*i] = colors[newGrid[x][y]][0]; // Red
+        bufferImage.data[4*i + 1] = colors[newGrid[x][y]][1]; // Green
+        bufferImage.data[4*i + 2] = colors[newGrid[x][y]][2]; // Blue
+        bufferImage.data[4*i + 3] = 255//[Math.floor(i/cellSize)%boardWidth][Math.floor(i/canvasSize)]; // Alpha (fully opaque)}
+        grid[x][y] = newGrid[x][y]
         }
-    }
+    context.putImageData(bufferImage,0,0)
 }
