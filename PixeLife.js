@@ -398,18 +398,22 @@ window.onload = function() {
         mousedown = null
         lock = null;
     }
+    board.ontouchstart = function(e) {
+        lock = null;
+        mousex = e.offsetX/cellSize
+        mousey = e.offsetY/cellSize
+        mousedown = e.buttons;
+    }
+    board.ontouchmove = function(e) {
+        mousex = e.offsetX/cellSize
+        mousey = e.offsetY/cellSize
+    }
+    window.ontouchend = function(e) {
+        mousedown = null;
+        lock = null
+    }
     window.oncontextmenu = function () { return false; }
     setInterval(update,1000/60);
-    context.fillStyle= `rgb(
-        ${colors["border"][0]},
-        ${colors["border"][1]},
-        ${colors["border"][2]})`;
-    context.fillRect(0,0,canvasSize,canvasSize);
-    context.fillStyle= `rgb(
-        ${colors["air"][0]},
-        ${colors["air"][1]},
-        ${colors["air"][2]})`;
-    context.fillRect(cellSize,cellSize,canvasSize-cellSize*2,canvasSize-cellSize*2);
 }
 
 function update() {
