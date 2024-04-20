@@ -452,9 +452,9 @@ function update() {
         let points=linePoints(pmousex,pmousey,mousex,mousey);
         for (let [px,py] of points){
             for (let i = 0; i< mouseSize; i++) {
-                let placex = Math.floor(px+mousex+i-mouseSize/2+0.5);
+                let placex = Math.floor(px+i-mouseSize/2+0.5);
                 for (let j=0; j < mouseSize; j++) {
-                    let placey = Math.floor(py+mousey+j-mouseSize/2+0.5);
+                    let placey = Math.floor(py+j-mouseSize/2+0.5);
                     if (placex>0&&placex<boardWidth-1&&placey>0&&placey<boardHeight-1)
                     {newGrid[placex][placey] = element}
                 }
