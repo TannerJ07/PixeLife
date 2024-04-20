@@ -402,7 +402,7 @@ window.onload = function() {
         lock = null;
         mousex = e.offsetX/cellSize
         mousey = e.offsetY/cellSize
-        mousedown = e.buttons;
+        mousedown = 1;
     }
     board.ontouchmove = function(e) {
         mousex = e.offsetX/cellSize
