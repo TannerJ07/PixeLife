@@ -22,6 +22,7 @@ let mousedown = false;
 let freezeMouse = false
 let mouseSize = 1;
 let mousex, mousey;
+let pmousex,pmousey;
 let ogMousex, ogMousey;
 let lock;
 let element = "sand";
@@ -446,9 +447,14 @@ function linePoints(x1,y1,x2,y2) {
 }
 
 function update() {
-    
     updateGrid();
-    if (mousedown==1&&doMouse) {
+    if (mousedown&&doMouse) {
+        let tile
+        if (mousedown === 1) {
+            tile = element;
+        } else {
+            tile = "air"
+        }
         let points=linePoints(pmousex,pmousey,mousex,mousey);
         for (let [px,py] of points){
             for (let i = 0; i< mouseSize; i++) {
@@ -456,18 +462,8 @@ function update() {
                 for (let j=0; j < mouseSize; j++) {
                     let placey = Math.floor(py+j-mouseSize/2+0.5);
                     if (placex>0&&placex<boardWidth-1&&placey>0&&placey<boardHeight-1)
-                    {newGrid[placex][placey] = element}
+                    {newGrid[placex][placey] = tile}
                 }
-            }
-        }
-    }
-    if (mousedown==2&&doMouse) {
-        for (let i = 0; i< mouseSize; i++) {
-            for (let j=0; j < mouseSize; j++) {
-                let placex = Math.floor(mousex+i-mouseSize/2+0.5);
-                let placey = Math.floor(mousey+j-mouseSize/2+0.5);
-                if (placex>0&&placex<boardWidth-1&&placey>0&&placey<boardHeight-1)
-                {newGrid[placex][placey] = "air"}
             }
         }
     }
