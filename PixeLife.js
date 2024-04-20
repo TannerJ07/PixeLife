@@ -398,22 +398,6 @@ window.onload = function() {
         mousedown = null
         lock = null;
     }
-    board.ontouchstart = function(e) {
-        lock = null;
-        mousex = e.offsetX/cellSize
-        mousey = e.offsetY/cellSize
-        mousedown = 1;
-    }
-    board.ontouchmove = function(e) {
-        mousex = e.offsetX/cellSize
-        mousey = e.offsetY/cellSize
-    }
-    window.ontouchend = function(e) {
-        mousedown = null;
-        lock = null
-    }
-    window.oncontextmenu = function () { return false; }
-    setInterval(update,1000/60);
 }
 
 function update() {
