@@ -397,7 +397,9 @@ window.onload = function() {
     window.onmouseup = function() {
         mousedown = null
         lock = null;
-    }
+    }    
+    window.oncontextmenu = function () { return false; }
+    setInterval(update,1000/60);
 }
 
 function update() {
