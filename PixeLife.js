@@ -22,6 +22,7 @@ let mousedown = false;
 let freezeMouse = false
 let mouseSize = 1;
 let mousex, mousey;
+let pmousex,pmousey;
 let ogMousex, ogMousey;
 let lock;
 let element = "sand";
@@ -376,6 +377,8 @@ window.onload = function() {
         lock = null;
         mousex = e.offsetX/cellSize
         mousey = e.offsetY/cellSize
+        pmousex = mousex
+        pmousey = mousey
         ogMousex = e.offsetX
         ogMousey = e.offsetY
         mousedown = e.buttons;
@@ -403,26 +406,64 @@ window.onload = function() {
     setInterval(update,1000/60);
 }
 
-function update() {
-    
-    updateGrid();
-    if (mousedown==1&&doMouse) {
-        for (let i = 0; i< mouseSize; i++) {
-            let placex = Math.floor(mousex+i-mouseSize/2+0.5);
-            for (let j=0; j < mouseSize; j++) {
-                let placey = Math.floor(mousey+j-mouseSize/2+0.5);
-                if (placex>0&&placex<boardWidth-1&&placey>0&&placey<boardHeight-1)
-                {newGrid[placex][placey] = element}
-            }
-        }
+// returns an array
+function linePoints(x1,y1,x2,y2) {
+    // bresenham line algorithm
+    // points are 2 element arrays
+    let dx=x2-x1;
+    let dy=y2-y1;
+    let xdir=1;
+    let ydir=1;
+    let coord;
+    if (dx<0){
+        dx=-dx;
+        xdir=-1;
     }
-    if (mousedown==2&&doMouse) {
-        for (let i = 0; i< mouseSize; i++) {
-            for (let j=0; j < mouseSize; j++) {
-                let placex = Math.floor(mousex+i-mouseSize/2+0.5);
-                let placey = Math.floor(mousey+j-mouseSize/2+0.5);
-                if (placex>0&&placex<boardWidth-1&&placey>0&&placey<boardHeight-1)
-                {newGrid[placex][placey] = "air"}
+    if (dy<0){
+        dy=-dy;
+        ydir=-1;
+    }
+    let dxy=[dx,dy];
+    let dir=[xdir,ydir];
+    if (dx>dy) {
+        coord=0;
+    } else {
+        coord=1;
+    }
+    let point=[x1,y1];
+    let points=[point];
+    let d=2*dxy[1-coord]-dxy[coord];
+    for (let i=0;i<dxy[coord];i++){
+        point=[point[0],point[1]]; // copy
+        point[coord]+=dir[coord];
+        if (d>0) {
+            point[1-coord]+=dir[1-coord];
+            d-=2*dxy[coord];
+        }
+        d+=2*dxy[1-coord];
+        points.push(point);
+    }
+    return points;
+}
+
+function update() {
+    updateGrid();
+    if (mousedown&&doMouse) {
+        let tile
+        if (mousedown === 1) {
+            tile = element;
+        } else {
+            tile = "air"
+        }
+        let points=linePoints(pmousex,pmousey,mousex,mousey);
+        for (let [px,py] of points){
+            for (let i = 0; i< mouseSize; i++) {
+                let placex = Math.floor(px+i-mouseSize/2+0.5);
+                for (let j=0; j < mouseSize; j++) {
+                    let placey = Math.floor(py+j-mouseSize/2+0.5);
+                    if (placex>0&&placex<boardWidth-1&&placey>0&&placey<boardHeight-1)
+                    {newGrid[placex][placey] = tile}
+                }
             }
         }
     }
@@ -431,6 +472,9 @@ function update() {
     } else {
         doMouse = true;
     }
+    
+    pmousex = mousex
+    pmousey = mousey
     
     displayBoard();
 }
