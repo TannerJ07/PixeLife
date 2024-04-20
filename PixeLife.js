@@ -379,20 +379,21 @@ window.onload = function() {
         ogMousex = e.offsetX
         ogMousey = e.offsetY
         mousedown = e.buttons;
+        doMouse = true;
     }
     board.onmousemove = function(e) {
         if (e.shiftKey) {
             if (lock===0||(lock!==1&&Math.abs(e.offsetX-ogMousex)>cellSize)) {
                 mousex = e.offsetX/cellSize;
                 lock = 0;
-            }
-            if (lock===1||(lock!==0&&Math.abs(e.offsetY-ogMousey)>cellSize)){
+            }else if (lock===1||(lock!==0&&Math.abs(e.offsetY-ogMousey)>cellSize)){
                 mousey = e.offsetY/cellSize;
                 lock = 1;
             }
         } else{
         mousex = e.offsetX/cellSize
         mousey = e.offsetY/cellSize}
+        doMouse = true
     }
     window.onmouseup = function() {
         mousedown = null
@@ -407,8 +408,8 @@ function update() {
     updateGrid();
     if (mousedown==1&&doMouse) {
         for (let i = 0; i< mouseSize; i++) {
+            let placex = Math.floor(mousex+i-mouseSize/2+0.5);
             for (let j=0; j < mouseSize; j++) {
-                let placex = Math.floor(mousex+i-mouseSize/2+0.5);
                 let placey = Math.floor(mousey+j-mouseSize/2+0.5);
                 if (placex>0&&placex<boardWidth-1&&placey>0&&placey<boardHeight-1)
                 {newGrid[placex][placey] = element}
@@ -504,9 +505,10 @@ function displayBoard () {
     for (let i = 0; i < canvasSize*canvasSize; i++) {
         let x = Math.floor(i/cellSize)%boardWidth
         let y = Math.floor(i/canvasSize/cellSize)
-        bufferImage.data[4*i] = colors[newGrid[x][y]][0]; // Red
-        bufferImage.data[4*i + 1] = colors[newGrid[x][y]][1]; // Green
-        bufferImage.data[4*i + 2] = colors[newGrid[x][y]][2]; // Blue
+        let color = colors[newGrid[x][y]]
+        bufferImage.data[4*i] = color[0]; // Red
+        bufferImage.data[4*i + 1] = color[1]; // Green
+        bufferImage.data[4*i + 2] = color[2]; // Blue
         bufferImage.data[4*i + 3] = 255//[Math.floor(i/cellSize)%boardWidth][Math.floor(i/canvasSize)]; // Alpha (fully opaque)}
         grid[x][y] = newGrid[x][y]
         }
