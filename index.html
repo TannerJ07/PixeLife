@@ -9,6 +9,10 @@
     <body>
         <h1>PixeLife</h1>
         <canvas id="board"></canvas>
+        <div class="slidecontainer">
+            CELL SIZE: <span id="cellSizePos"></span>
+            <input type="range" min="1" max="100" value="5" class="slider" id="cellSizeSlider">
+        </div>
         <div id="selector"></div>
         <div id="element-holder"></div>
         <script src="PixeLife.js"></script>

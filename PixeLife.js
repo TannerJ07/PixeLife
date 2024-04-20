@@ -1,7 +1,7 @@
 const canvasSize = 500
-const cellSize = 4
-const boardHeight = canvasSize/cellSize
-const boardWidth = canvasSize/cellSize
+let cellSize = 4
+let boardHeight = canvasSize/cellSize
+let boardWidth = canvasSize/cellSize
 
 /*const boardWidth = 100
 const boardHeight = boardWidth
@@ -15,7 +15,9 @@ let newGrid = {};
 let board = document.getElementById("board");
 let context = board.getContext("2d")
 const bufferImage = context.createImageData(canvasSize,canvasSize)
-
+const slider = document.getElementById("cellSizeSlider")
+const cellSizeOutput = document.getElementById("cellSizePos")
+cellSizeOutput.innerHTML = slider.value
 
 let selector
 let mousedown = false;
@@ -400,6 +402,16 @@ window.onload = function() {
         lock = null;
     }    
     window.oncontextmenu = function () { return false; }
+
+    slider.oninput = function() {
+        cellSizeOutput.innerHTML = this.value
+        selector.innerHTML = "";
+        cellSize = this.value;
+        boardHeight = canvasSize/cellSize
+        boardWidth = canvasSize/cellSize
+        setGame();
+    }
+
     setInterval(update,1000/60);
 }
 
@@ -447,8 +459,6 @@ function updateGrid() {
 }
 
 function setGame (){
-    board = document.getElementById("board")
-    context = board.getContext("2d")
     for(let i = 0;i<boardWidth;i++) {
         grid[i] = {};
         newGrid[i] = {};
