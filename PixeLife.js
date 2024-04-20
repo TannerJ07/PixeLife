@@ -513,4 +513,7 @@ function displayBoard () {
         grid[x][y] = newGrid[x][y]
         }
     context.putImageData(bufferImage,0,0)
+    context.strokeStyle = "black"
+    context.lineWidth = 2,
+    context.strokeRect(Math.floor(mousex-mouseSize/2+0.5)*cellSize,Math.floor(mousey-mouseSize/2+0.5)*cellSize,mouseSize*cellSize,mouseSize*cellSize)
 }
