@@ -1,3 +1,0 @@
-Time to beat: 54ms
-
-use .square in the futre -- no. too slow
