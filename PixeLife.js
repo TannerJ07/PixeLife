@@ -376,6 +376,13 @@ function setSpeed(framerate) {
     updateinterval = setInterval(update,1000/framerate);
 }
 
+function pause(framerate) {
+    if (updateinterval) {
+        clearInterval(updateinterval);
+    }
+    updateinterval = null;
+}
+
 window.onload = function() {
     board.height = canvasSize
     board.width = canvasSize
@@ -525,6 +532,27 @@ function setGame (){
         });
         controls.appendChild(button);
     }
+
+    button = document.createElement("button");
+    button.appendChild(document.createTextNode("pause"));
+    button.addEventListener("click",function (event) {
+        pause();
+    });
+    controls.appendChild(button);
+
+    button = document.createElement("button");
+    button.appendChild(document.createTextNode("play"));
+    button.addEventListener("click",function (event) {
+        setSpeed(framerate);
+    });
+    controls.appendChild(button);
+
+    button = document.createElement("button");
+    button.appendChild(document.createTextNode("step"));
+    button.addEventListener("click",function (event) {
+        update();
+    });
+    controls.appendChild(button);
     
     for (let j = 0; j<elements.length;j++) {
         
