@@ -27,6 +27,8 @@ let ogMousex, ogMousey;
 let lock;
 let element = "sand";
 let doMouse = true;
+let updateinterval; // the update interval (for changing speed)
+let framerate = 60;
 
 const colors = {
     fuse:[200,50,0],
@@ -367,6 +369,10 @@ function blockDetect(x,y,block) {
     }
 }
 
+function setSpeed(framerate) {
+    updateinterval = setInterval(update,1000/framerate);
+}
+
 window.onload = function() {
     board.height = canvasSize
     board.width = canvasSize
@@ -403,7 +409,8 @@ window.onload = function() {
         lock = null;
     }    
     window.oncontextmenu = function () { return false; }
-    setInterval(update,1000/60);
+
+    setSpeed(framerate);
 }
 
 // returns an array
@@ -505,6 +512,17 @@ function setGame (){
             newGrid[i][j] = "air";}
         }
     }
+    controls = document.getElementById("controls");
+    for (let i = 0; i < framerates.length; i++) {
+        button = document.createElement("button");
+        button.appendChild(document.createTextNode(framerates[i]));
+        button.addEventListener("click",function (event) {
+            framerate = framerates[i]; // it captures the correct i
+            setSpeed(framerate);
+        });
+        controls.appendChild(button);
+    }
+    
     for (let j = 0; j<elements.length;j++) {
         
         button =  document.createElement("button");
