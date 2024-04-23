@@ -370,6 +370,9 @@ function blockDetect(x,y,block) {
 }
 
 function setSpeed(framerate) {
+    if (updateinterval) {
+        clearInterval(updateinterval);
+    }
     updateinterval = setInterval(update,1000/framerate);
 }
 
