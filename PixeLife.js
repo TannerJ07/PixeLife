@@ -522,6 +522,7 @@ function setGame (){
             newGrid[i][j] = "air";}
         }
     }
+    let framerates = [10, 20, 30, 60, 100, 200];
     controls = document.getElementById("controls");
     for (let i = 0; i < framerates.length; i++) {
         button = document.createElement("button");
